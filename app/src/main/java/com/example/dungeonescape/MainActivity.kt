@@ -70,10 +70,18 @@ fun DungeonGame() {
     // プレイヤーのステータス（初期位置 x=1, y=1）
     var playerX by remember { mutableIntStateOf(1) }
     var playerY by remember { mutableIntStateOf(1) }
+    var hp by remember { mutableIntStateOf(3) }     // 現在のHP
+    var maxHp by remember { mutableIntStateOf(3) }  // 最大HP
+    var level by remember { mutableIntStateOf(1) }  // 現在のレベル
+    var exp by remember { mutableIntStateOf(0) }    // 現在の経験値
+    var score by remember { mutableIntStateOf(0) }  // 現在の得点
+    var hasKey by remember { mutableStateOf(false) }    // 鍵の取得判定
+    var floorCount by remember { mutableIntStateOf(1) } //階層カウント
 
     // 敵のステータス（初期位置 x=7, y=5）
     var enemyX by remember { mutableIntStateOf(7) }
     var enemyY by remember { mutableIntStateOf(5) }
+    var enemyHp by remember { mutableIntStateOf(2) }
 
     // ゲーム画面
     Column(
@@ -84,6 +92,19 @@ fun DungeonGame() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
+        // 画面上部に表示するステータスバー
+        // 横に並べる
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(24.dp, vertical = 30.dp)   // マップとステータスバーの空間
+        ) {
+            Text(
+                text = "❤ ❤ ❤  Lv.$level  Floor: $floorCount  Score: $score",
+                color = Color.White
+            )
+        }
+
         // マップ画面
         Column(
             modifier = Modifier
@@ -118,7 +139,7 @@ fun DungeonGame() {
                                 Text("🔵", fontSize = 20.sp)
                             }
 
-                            if (x == enemyX && y == enemyY) {
+                            if (x == enemyX && y == enemyY && enemyHp > 0) {
                                 Text("👾", fontSize = 20.sp)
                             }
                         }

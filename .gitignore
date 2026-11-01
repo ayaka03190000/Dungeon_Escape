@@ -1,0 +1,27 @@
+# Gradleのビルド成果物・キャッシュ
+.gradle/
+build/
+app/build/
+
+# ローカル環境依存の設定・パス
+local.properties
+
+# Android Studio (.idea) フォルダ内の不要ファイル
+.idea/caches/
+.idea/libraries/
+.idea/modules.xml
+.idea/workspace.xml
+.idea/navCompiler.xml
+.idea/assetWizardSettings.xml
+*.iml
+.idea/gradle.xml
+
+# OS固有の不可視ファイル
+.DS_Store
+Thumbs.db
+
+# キャプチャや署名キー関連
+*.apk
+*.aab
+*.keystore
+*.jks

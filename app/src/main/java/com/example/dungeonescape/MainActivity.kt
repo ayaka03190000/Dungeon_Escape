@@ -43,6 +43,19 @@ class MainActivity : ComponentActivity() {
 @Composable
 // DungeonGameという画面を表示する関数
 fun DungeonGame() {
+    // 画面の状態
+    var gameState by remember { mutableStateOf("title") }
+
+    // 選択した難易度
+    var difficulty by remember { mutableStateOf("NORMAL") }
+
+    // 難易度ごとの階層数
+    val maxFloor = when (difficulty) {
+        "EASY" -> 1
+        "NORMAL" -> 3
+        "HARD" -> 5
+        else -> 3
+    }
 
     // 0 = 床
     // 1 = 壁
@@ -194,121 +207,185 @@ fun DungeonGame() {
         moveEnemy()
     }
 
-    // 縦に並べる
-    Column(
-        modifier = Modifier
-            .fillMaxSize()      // 全画面表示
-            .background(Color.Black)    // 背景を黒に設定
-            .padding(vertical = 24.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        // 画面上部に表示するステータスバー
-        // 横に並べる
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(24.dp, vertical = 30.dp)   // マップとステータスバーの空間
-        ) {
-            Text(
-                text = "❤ ❤ ❤  Lv.$level  Floor: $floorCount  Score: $score",
-                color = Color.White
-            )
-        }
-
-        // ゲーム画面
+    // タイトル画面
+    if (gameState == "title") {
         Column(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 32.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
+                .fillMaxSize()
+                .background(Color.Black),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
         ) {
-            for (y in map.indices) {
-                Row {
-                    for (x in map[y].indices) {
-                        val tile = map[y][x]
+            // タイトル
+            Text(
+                text = "DUNGEON ESCAPE",
+                color = Color.White,
+                fontSize = 32.sp
+            )
 
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .aspectRatio(1f)
-                                .background(
-                                    if (tile == 1) Color.DarkGray
-                                    else Color.LightGray
-                                )
-                                .border(0.5.dp, Color.Gray),    // マス目沿って薄い線を描く
-                            contentAlignment = Alignment.Center
-                        ) {
-                            when (tile) {
-                                2 -> Text("🔑", fontSize = 20.sp)
-                                3 -> Text("🚪", fontSize = 20.sp)
-                                4 -> Text("🧪", fontSize = 20.sp)
-                                5 -> Text("🪙", fontSize = 20.sp)
-                            }
+            Spacer(modifier = Modifier.height(40.dp))
 
-                            if (x == playerX && y == playerY) {
-                                Text("🔵", fontSize = 20.sp)
-                            }
+            Text(
+                text = "SELECT DIFFICULTY",
+                color = Color.LightGray,
+                fontSize = 18.sp
+            )
 
-                            if (x == enemyX && y == enemyY && enemyHp > 0) {
-                                Text("👾", fontSize = 20.sp)
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // 難易度選択
+            Button(
+                onClick = { difficulty = "EASY" }
+            ) {
+                Text("EASY")
+            }
+
+            Button(
+                onClick = { difficulty = "NORMAL" }
+            ) {
+                Text("NORMAL")
+            }
+
+            Button(
+                onClick = { difficulty = "HARD" }
+            ) {
+                Text("HARD")
+            }
+
+            Spacer(modifier = Modifier.height(30.dp))
+
+            // 選択中の難易度
+            Text(
+                text = "Selected: $difficulty",
+                color = Color.Yellow
+            )
+
+            Spacer(modifier = Modifier.height(20.dp))
+
+            // ゲームスタートボタン
+            Button(
+                onClick = { gameState = "playing" }
+            ) {
+                Text("START GAME")
+            }
+        }
+    } else {
+        // 縦に並べる
+        Column(
+            modifier = Modifier
+                .fillMaxSize()      // 全画面表示
+                .background(Color.Black)    // 背景を黒に設定
+                .padding(vertical = 24.dp),
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            // 画面上部に表示するステータスバー
+            // 横に並べる
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(24.dp, vertical = 30.dp)   // マップとステータスバーの空間
+            ) {
+                Text(
+                    text = "❤ ❤ ❤  Lv.$level  Floor: $floorCount  Score: $score",
+                    color = Color.White
+                )
+            }
+
+            // ゲーム画面
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 32.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                for (y in map.indices) {
+                    Row {
+                        for (x in map[y].indices) {
+                            val tile = map[y][x]
+
+                            Box(
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .aspectRatio(1f)
+                                    .background(
+                                        if (tile == 1) Color.DarkGray
+                                        else Color.LightGray
+                                    )
+                                    .border(0.5.dp, Color.Gray),    // マス目沿って薄い線を描く
+                                contentAlignment = Alignment.Center
+                            ) {
+                                when (tile) {
+                                    2 -> Text("🔑", fontSize = 20.sp)
+                                    3 -> Text("🚪", fontSize = 20.sp)
+                                    4 -> Text("🧪", fontSize = 20.sp)
+                                    5 -> Text("🪙", fontSize = 20.sp)
+                                }
+
+                                if (x == playerX && y == playerY) {
+                                    Text("🔵", fontSize = 20.sp)
+                                }
+
+                                if (x == enemyX && y == enemyY && enemyHp > 0) {
+                                    Text("👾", fontSize = 20.sp)
+                                }
                             }
                         }
                     }
                 }
             }
-        }
 
-        Spacer(modifier = Modifier.height(70.dp))   // マップとボタンの間隔
-        // 操作ボタン
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 16.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            // 上ボタン
-            Button(
-                onClick = { movePlayer(0, -1) },
-                modifier = Modifier.width(72.dp)
+            Spacer(modifier = Modifier.height(70.dp))   // マップとボタンの間隔
+            // 操作ボタン
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Text("↑", fontSize = 24.sp)
-            }
-
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // 左ボタン
+                // 上ボタン
                 Button(
-                    onClick = { movePlayer(-1, 0) },
+                    onClick = { movePlayer(0, -1) },
                     modifier = Modifier.width(72.dp)
                 ) {
-                    Text("←", fontSize = 24.sp)
+                    Text("↑", fontSize = 24.sp)
                 }
 
-                Spacer(modifier = Modifier.width(8.dp))
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    // 左ボタン
+                    Button(
+                        onClick = { movePlayer(-1, 0) },
+                        modifier = Modifier.width(72.dp)
+                    ) {
+                        Text("←", fontSize = 24.sp)
+                    }
 
-                // 左右ボタンの間にボタン一つ分の空白を作る
-                Spacer(modifier = Modifier.width(72.dp))
-                Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
 
-                // 右ボタン
+                    // 左右ボタンの間にボタン一つ分の空白を作る
+                    Spacer(modifier = Modifier.width(72.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+
+                    // 右ボタン
+                    Button(
+                        onClick = { movePlayer(1, 0) },
+                        modifier = Modifier.width(72.dp)
+                    ) {
+                        Text("→", fontSize = 24.sp)
+                    }
+                }
+
+                // 下ボタン
                 Button(
-                    onClick = { movePlayer(1, 0) },
+                    onClick = { movePlayer(0, 1) },
                     modifier = Modifier.width(72.dp)
                 ) {
-                    Text("→", fontSize = 24.sp)
+                    Text("↓", fontSize = 24.sp)
                 }
-            }
-
-            // 下ボタン
-            Button(
-                onClick = { movePlayer(0,1) },
-                modifier = Modifier.width(72.dp)
-            ) {
-                Text("↓", fontSize = 24.sp)
             }
         }
     }

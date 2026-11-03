@@ -40,6 +40,60 @@ class MainActivity : ComponentActivity() {
     }
 }
 
+// 迷路生成
+fun generateMaze(size: Int): Array<IntArray> {
+    // 最初に全て壁にする
+    val maze = Array(size) { IntArray(size) { 1 } }
+
+    // スタート地点
+    val startX = 1
+    val startY = 1
+    maze[startY][startX] = 0
+
+    // DFSで使う方向
+    val dx = intArrayOf(0, 0, -2, 2)
+    val dy = intArrayOf(-2, 2, 0, 0)
+
+    // 探索する場所を保存する
+    val stack = mutableListOf<Pair<Int, Int>>()
+    stack.add(Pair(startX, startY))
+
+    while (stack.isNotEmpty()) {
+        val current = stack.last()
+        val x = current.first
+        val y = current.second
+
+        // 4方向をランダムな順番で調べる
+        val directions = (0..3).shuffled()
+        var moved = false
+
+        for (d in directions) {
+            val nx = x + dx[d]
+            val ny = y + dy[d]
+
+            // マップの範囲内か確認
+            if (nx > 0 && nx < size - 1 && ny > 0 && ny < size -1) {
+                // まだ壁なら通路にする
+                if (maze[ny][nx] == 1) {
+                    // 間の壁も壊す
+                    maze[y + dy[d] / 2][x + dx[d]/ 2] = 0
+                    maze[ny][nx] = 0
+
+                    stack.add(Pair(nx, ny))
+                    moved = true
+                    break
+
+                }
+            }
+        }
+        // 進める方向がなければ戻る
+        if (!moved) {
+            stack.removeAt(stack.lastIndex)
+        }
+    }
+    return maze
+}
+
 @Composable
 // DungeonGameという画面を表示する関数
 fun DungeonGame() {
@@ -65,19 +119,7 @@ fun DungeonGame() {
     // 5 = コイン
 
     var map by remember{
-        mutableStateOf(
-            arrayOf(
-                intArrayOf(1,1,1,1,1,1,1,1,1),
-                intArrayOf(1,0,0,0,1,0,0,2,1),
-                intArrayOf(1,0,1,0,1,0,1,0,1),
-                intArrayOf(1,0,1,0,0,0,1,0,1),
-                intArrayOf(1,0,1,1,1,0,1,0,1),
-                intArrayOf(1,0,5,0,0,0,1,0,1),
-                intArrayOf(1,1,1,1,1,1,1,0,1),
-                intArrayOf(1,4,0,0,0,0,0,3,1),
-                intArrayOf(1,1,1,1,1,1,1,1,1)
-            )
-        )
+        mutableStateOf(generateMaze(9))
     }
 
     // プレイヤーのステータス（初期位置 x=1, y=1）
@@ -264,7 +306,12 @@ fun DungeonGame() {
 
             // ゲームスタートボタン
             Button(
-                onClick = { gameState = "playing" }
+                onClick = {
+                    map = generateMaze(9)
+                    playerX = 1
+                    playerY = 1
+                    gameState = "playing"
+                }
             ) {
                 Text("START GAME")
             }

@@ -91,6 +91,40 @@ fun generateMaze(size: Int): Array<IntArray> {
             stack.removeAt(stack.lastIndex)
         }
     }
+
+    // アイテムを配置できる通路を集める
+    val positions = mutableListOf<Pair<Int, Int>>()
+    for (y in maze.indices) {
+        for (x in maze[y].indices) {
+            // 通路でスタート地点ではない場所
+            if (maze[y][x] == 0 && !(x == 1 && y == 1)) {
+                positions.add(Pair(x, y))
+            }
+        }
+    }
+
+    // 配置場所をランダムな順番にする
+    val randomPositions = positions.shuffled()
+
+    // 鍵を配置
+    val key = randomPositions[0]
+    maze[key.second][key.first] = 2
+
+    // ドアを配置
+    val door = randomPositions[1]
+    maze[door.second][door.first] = 3
+
+    // ポーションを2個配置
+    for (i in 2..3) {
+        val potion = randomPositions[i]
+        maze[potion.second][potion.first] = 4
+    }
+
+    // コインを3個配置
+    for (i in 4..6) {
+        val coin = randomPositions[i]
+        maze[coin.second][coin.first] = 5
+    }
     return maze
 }
 
@@ -192,8 +226,37 @@ fun DungeonGame() {
         // ドアに入る
         if (targetTile == 3) {
             if (hasKey) {
+                // 次の階へ進む
                 floorCount += 1
                 hasKey = false
+
+                // 新しい迷路を生成
+                map = generateMaze(9)
+
+                // プレイヤーをスタート地点に戻す
+                playerX = 1
+                playerY = 1
+
+                // 敵のHPを回復
+                enemyHp = 2
+
+                // 新しいマップの通路から敵の配置場所を探す
+                val enemyPositions = mutableListOf<Pair<Int, Int>>()
+
+                for (y in map.indices) {
+                    for (x in map[y].indices) {
+                        if (map[y][x] == 0 && !(x == 1 && y == 1)) {
+                            enemyPositions.add(Pair(x,y))
+                        }
+                    }
+                }
+
+                // 敵をランダムな場所に配置
+                val enemyPosition = enemyPositions.random()
+                enemyX = enemyPosition.first
+                enemyY = enemyPosition.second
+
+                return
             } else {
                 return
             }
